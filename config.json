@@ -1,0 +1,20 @@
+{
+  "chainId": 43114,
+  "simulate": true,
+  "vaultsToDeploy": [
+    {
+      "underlying": "0x",
+      "name": "",
+      "safe": "0x",
+      "symbol": "",
+      "whitelistManager": "0x",
+      "valuationManager": "0x",
+      "admin": "0x",
+      "feeReceiver": "0x",
+      "managementRate": 0,
+      "performanceRate": 2000,
+      "enableWhitelist": false,
+      "rateUpdateCooldown": "86400"
+    }
+  ]
+}
