@@ -12,7 +12,7 @@ A TypeScript script for deploying vault proxies using the Lagoon Protocol factor
 
 * Install dependencies:
 ```bash
-bun install viem @lagoon-protocol/v0-core
+bun install
 ```
 
 ## Configuration
