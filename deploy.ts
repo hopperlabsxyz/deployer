@@ -33,7 +33,7 @@ const configData = readFileSync(configPath, 'utf-8');
 const rawConfig: Config = JSON.parse(configData);
 
 // Convert string rateUpdateCooldown to bigint
-const config: { chainId: number, vaultsToDeploy: VaultInit[] } = {
+const config: { chainId: number, vaultsToDeploy: VaultInit[], simulate: boolean } = {
   chainId: rawConfig.chainId,
   vaultsToDeploy: rawConfig.vaultsToDeploy.map((vault) => ({
     ...vault,
