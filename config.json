@@ -4,10 +4,9 @@
   "vaultsToDeploy": [
     {
       "underlying": "0x",
-      "name": "",
-      "safe": "0x",
       "symbol": "",
-      "whitelistManager": "0x",
+      "safe": "0x",
+      "whitelistManager": "0x0000000000000000000000000000000000000000",
       "valuationManager": "0x",
       "admin": "0x",
       "feeReceiver": "0x",
