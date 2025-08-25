@@ -5,6 +5,7 @@
     {
       "underlying": "0x",
       "symbol": "",
+      "name": "",
       "safe": "0x",
       "whitelistManager": "0x0000000000000000000000000000000000000000",
       "valuationManager": "0x",
