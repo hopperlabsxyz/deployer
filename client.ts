@@ -6,7 +6,7 @@ import {
   type Address,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { avalanche, mainnet, tac } from "viem/chains";
+import { avalanche, linea, mainnet, tac } from "viem/chains";
 
 if (
   typeof Bun.env.PRIVATE_KEY !== "string" ||
@@ -68,6 +68,17 @@ export const clients = {
     walletClient: createWalletClient({
       chain: tac,
       transport: http("https://rpc.ankr.com/tac"),
+      account,
+    }),
+  },
+  [linea.id]: {
+    publicClient: createPublicClient({
+      chain: linea,
+      transport: http("https://rpc.linea.build"),
+    }),
+    walletClient: createWalletClient({
+      chain: linea,
+      transport: http("https://rpc.linea.build"),
       account,
     }),
   },
