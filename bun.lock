@@ -4,8 +4,8 @@
     "": {
       "name": "tmp",
       "dependencies": {
-        "@lagoon-protocol/v0-core": "v0.5.0",
-        "@lagoon-protocol/v0-viem": "^0.5.0",
+        "@lagoon-protocol/v0-core": "v0.9.0",
+        "@lagoon-protocol/v0-viem": "v0.9.0",
         "viem": "^2.33.3",
       },
       "devDependencies": {
@@ -19,9 +19,9 @@
   "packages": {
     "@adraffy/ens-normalize": ["@adraffy/ens-normalize@1.11.0", "", {}, "sha512-/3DDPKHqqIqxUULp8yP4zODUY1i+2xvVWsv8A79xGWdCAG+8sb0hRh0Rk2QyOJUnnbyPUAZYcpBuRe3nS2OIUg=="],
 
-    "@lagoon-protocol/v0-core": ["@lagoon-protocol/v0-core@0.5.0", "", { "peerDependencies": { "typescript": "^5" } }, "sha512-nSoYRWm5+Nr9XJM0d0DDEDsm1ugNpfnMtSomcGAL7vJPveYs4iptXX5/yMCR33QCRw6F5odpV9yTMOr4DHNbCg=="],
+    "@lagoon-protocol/v0-core": ["@lagoon-protocol/v0-core@0.9.0", "", { "peerDependencies": { "typescript": "^5" } }, "sha512-FamZwwXJx/5yikNZ+9dDo0ErK6zX0AKTfzOOrvP6p1D5Z6YGktPm8q0+lzB8HUkV4T6UrmMI5wSE8W6dw7WTNg=="],
 
-    "@lagoon-protocol/v0-viem": ["@lagoon-protocol/v0-viem@0.5.0", "", { "peerDependencies": { "@lagoon-protocol/v0-core": "^0.1.0", "viem": "^2.0.0" } }, "sha512-DOnqOO3xI/7pJsu3KeDT57hs6s753TDE1/p15Nn/gzZ+gZjtvRzeLMk63UJzQRBoZWMRCyrXX88qMwMDqK+osQ=="],
+    "@lagoon-protocol/v0-viem": ["@lagoon-protocol/v0-viem@0.9.0", "", { "peerDependencies": { "@lagoon-protocol/v0-core": "0.9.0", "viem": "^2.0.0" } }, "sha512-2pwQL6iYLiIGwc8K40/0OyziF4GFBRIFh7knPeqv2omSAi+6ryf+WQkWLvh2ZR3O7YEdMd7tBeetJ3PzGgkDVg=="],
 
     "@noble/ciphers": ["@noble/ciphers@1.3.0", "", {}, "sha512-2I0gnIVPtfnMw9ee9h1dJG7tp81+8Ob3OJb3Mv37rx5L40/b0i7djjCVvGOVqc9AEIQyvyu1i6ypKdFw8R8gQw=="],
 
