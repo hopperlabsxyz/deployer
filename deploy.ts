@@ -136,7 +136,6 @@ async function deploy({
     _init: vaultInit,
     salt: vaultConfig.salt ?? generateRandomBytes32(),
   });
-  // crypto.getRandomValues(bytes);
 }
 
 async function main() {
