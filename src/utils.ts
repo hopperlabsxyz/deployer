@@ -38,25 +38,3 @@ export function assertValidChainId(
     throw new Error(`Chain id ${chainId} not supported`);
   }
 }
-
-export function assertVersionSupported(
-  chainId: ChainId,
-  version: string
-): asserts version is VersionOrLatest {
-  if (version === "latest") return;
-  console.log(Object.values(Version));
-  // if (!Object.values(Version).includes(version as Version)) throw new Error(`Version ${version} is not a valid version`);
-  const chainAddresses: Record<string, boolean> = Object.values(
-    addresses
-  ).reduce((acc: Record<string, boolean>, chainData) => {
-    Object.keys(chainData).forEach((key) => {
-      // Matches v followed by digits, underscores, and dots (e.g., v0_5_0, v0.5.0)
-      if (/^v\d+[._]\d+[._]\d+$/.test(key)) {
-        acc[key] = true;
-      }
-    });
-    return acc;
-  }, {} as Record<string, boolean>);
-  if (!chainAddresses[version])
-    throw new Error(`Version ${version} not supported for chain id ${chainId}`);
-}
