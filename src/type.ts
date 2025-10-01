@@ -1,7 +1,7 @@
 import type { ChainId, VersionOrLatest } from "@lagoon-protocol/v0-core";
 import type { Hex } from "viem";
 
-type Address = `0x${string}`
+type Address = `0x${string}`;
 
 export type VaultInit = {
   underlying: Address;
@@ -20,13 +20,14 @@ export type VaultInit = {
 
 export type Config = {
   chainId: ChainId;
+
   vaultsToDeploy: VaultConfig[];
 };
 
 export type VaultConfig = {
   version: VersionOrLatest;
-  salt?: Hex;
   initialDelay?: number | string;
+  initialOwner?: Address;
   underlying: Address;
   name: string;
   symbol: string;
@@ -39,4 +40,5 @@ export type VaultConfig = {
   managementRate: number;
   rateUpdateCooldown: number | string;
   enableWhitelist: boolean;
+  salt?: Hex;
 };
