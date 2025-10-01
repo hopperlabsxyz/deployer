@@ -1,50 +1,12 @@
-import { type Address, type Hex } from "viem";
+#!/usr/bin/env bun
+
+import { type Address, type Hex, type Prettify } from "viem";
 import { readFileSync } from "fs";
 import { join } from "path";
-import { optiFactoryAbi } from "./abi";
-import { account, assertValidChainId, clients } from "./client"
-import { addresses } from "@lagoon-protocol/v0-core";
-
-// Infos used to init a vault proxy on factory v1
-interface VaultInit {
-  underlying: Address;
-  name: string;
-  safe: Address;
-  symbol: string,
-  whitelistManager: Address;
-  valuationManager: Address;
-  admin: Address;
-  feeReceiver: Address;
-  managementRate: number;
-  performanceRate: number;
-  enableWhitelist: boolean;
-  rateUpdateCooldown: bigint;
-}
-
-interface Config {
-  chainId: number;
-  simulate: boolean;
-  vaultsToDeploy: Omit<VaultInit, 'rateUpdateCooldown'> & { rateUpdateCooldown: string }[];
-}
-
-// Load config from JSON file
-const configPath = join(process.cwd(), 'config.json');
-const configData = readFileSync(configPath, 'utf-8');
-const rawConfig: Config = JSON.parse(configData);
-
-// Convert string rateUpdateCooldown to bigint
-const config: { chainId: number, vaultsToDeploy: VaultInit[], simulate: boolean } = {
-  chainId: rawConfig.chainId,
-  vaultsToDeploy: rawConfig.vaultsToDeploy.map((vault) => ({
-    ...vault,
-    rateUpdateCooldown: BigInt(vault.rateUpdateCooldown)
-  } as VaultInit)),
-  simulate: rawConfig.simulate
-};
-
-type Prettify<T> = {
-  [K in keyof T]: T[K];
-} & {}
+import { account, assertValidChainId, assertVersionSupported, createChainClients } from "./src/client"
+import { addresses, ChainId, type VersionOrLatest } from "@lagoon-protocol/v0-core";
+import type { Config, VaultConfig, VaultInit } from './src/type';
+import optinFactoryAbi from "./src/abis/optinFactoryAbi";
 
 async function deployWithOptinFactory(
   chainId: number,
@@ -55,16 +17,15 @@ async function deployWithOptinFactory(
     _initialDelay,
     _init,
     salt
-  }: { _logic: Address, _initialOwner: Address, _initialDelay: number, _init: Prettify<VaultInit>, salt: Hex }
+  }: { _logic: Address, _initialOwner: Address, _initialDelay: bigint, _init: Prettify<VaultInit>, salt: Hex }
 ) {
   assertValidChainId(chainId)
-  const client = clients[chainId].walletClient
-  const publicClient = clients[chainId].publicClient
-  const hash = await client.writeContract({
+  const { publicClient, walletClient } = createChainClients(chainId);
+  const hash = await walletClient.writeContract({
     address: factory,
-    abi: optiFactoryAbi,
+    abi: optinFactoryAbi,
     functionName: 'createVaultProxy',
-    args: [_logic, _initialOwner, _initialDelay, _init, salt]
+    args: [_logic, _initialOwner, _initialDelay, _init, salt],
   });
   await publicClient.waitForTransactionReceipt({ hash })
   return hash;
@@ -79,46 +40,100 @@ async function simulateWithOptinFactory(
     _initialDelay,
     _init,
     salt
-  }: { _logic: Address, _initialOwner: Address, _initialDelay: number, _init: Prettify<VaultInit>, salt: Hex }
+  }: { _logic: Address, _initialOwner: Address, _initialDelay: bigint, _init: Prettify<VaultInit>, salt: Hex }
 ) {
   assertValidChainId(chainId)
-  const client = clients[chainId].publicClient
-  return client.simulateContract({
+  const { publicClient } = createChainClients(chainId);
+  return publicClient.simulateContract({
     address: factory,
-    abi: optiFactoryAbi,
+    abi: optinFactoryAbi,
     functionName: 'createVaultProxy',
     args: [_logic, _initialOwner, _initialDelay, _init, salt],
     account
   });
 }
 
-async function deployOnMainnet({ vaultInit, chainId, simulate = true }: { vaultInit: VaultInit, chainId: number, simulate: boolean }) {
-  assertValidChainId(chainId)
-  const { optinFactory, v0_5_0 } = addresses[chainId]
-  const _initialDelay = 86400
-  const _initialOwner = vaultInit.safe
+function getDeploymentAddresses(chainId: ChainId, version: VersionOrLatest) {
+  assertValidChainId(chainId);
+  assertVersionSupported(chainId, version)
+  const deployAddress: Address = addresses[chainId].optinFactory
+  if (version === 'latest') {
+    return {
+      deployAddress,
+      logicAddress: '0x0000000000000000000000000000000000000000' as Address
+    }
+  }
+  if (!addresses[chainId].hasOwnProperty(version)) throw new Error(`Error while getting deployement addresses on chain id ${chainId} and version ${version}`)
+  const logicAddress: Address = (addresses as any)[chainId][version];
+  return {
+    deployAddress,
+    logicAddress
+  }
+}
+
+async function deployOnMainnet({ vaultConfig, chainId, simulate = true }: { vaultConfig: VaultConfig, chainId: number, simulate: boolean }) {
+  const { version, salt } = vaultConfig
+  const { logicAddress, deployAddress } = getDeploymentAddresses(chainId, version)
+  const _initialDelay = vaultConfig.initialDelay ? BigInt(vaultConfig.initialDelay) : 86400n // 1day
+  const _initialOwner = vaultConfig.safe
   const deploy = simulate ? simulateWithOptinFactory : deployWithOptinFactory
+  const vaultInit: VaultInit = {
+    underlying: vaultConfig.underlying,
+    name: vaultConfig.name,
+    symbol: vaultConfig.symbol,
+    safe: vaultConfig.safe,
+    admin: vaultConfig.admin,
+    whitelistManager: vaultConfig.whitelistManager,
+    feeReceiver: vaultConfig.feeReceiver,
+    valuationManager: vaultConfig.valuationManager,
+    performanceRate: vaultConfig.performanceRate,
+    managementRate: vaultConfig.managementRate,
+    rateUpdateCooldown: BigInt(vaultConfig.rateUpdateCooldown),
+    enableWhitelist: vaultConfig.enableWhitelist,
+  }
   return deploy(
     chainId,
-    optinFactory,
+    deployAddress,
     {
-      _logic: v0_5_0,
+      _logic: logicAddress,
       _initialOwner,
       _initialDelay,
       _init: vaultInit,
-      salt: "0x0000000000000000000000000000000000000000000000000000000000000000"
+      salt: salt ?? "0x0000000000000000000000000000000000000000000000000000000000000000"
     }
   );
 }
 
-const { chainId, vaultsToDeploy, simulate } = config;
-const responses: any[] = []
-for (let i = 0; i < vaultsToDeploy.length; i++) {
-  const vaultInit = vaultsToDeploy[i]
-  if (vaultInit) {
-    const res = await deployOnMainnet({ vaultInit, chainId, simulate })
-    responses.push(res)
+async function main() {
+  try {
+    // We do a simulation by default
+    const simulate = !process.argv.includes('--broadcast');
+
+    // Load config from JSON file
+    const configPath = join(process.cwd(), 'config.json');
+    const configData = readFileSync(configPath, 'utf-8');
+    const config: Config = JSON.parse(configData);
+
+    const { chainId, vaultsToDeploy } = config;
+    const responses: any[] = []
+
+    console.log(simulate ? 'Running simulation...' : 'Deploying vaults...');
+
+    for (let i = 0; i < vaultsToDeploy.length; i++) {
+      const vaultConfig = vaultsToDeploy[i]
+      if (vaultConfig) {
+        const res = await deployOnMainnet({ vaultConfig, chainId, simulate })
+        responses.push(res)
+      }
+    }
+
+    console.log(responses)
+
+    process.exit(0);
+  } catch (error) {
+    console.error('Error:', error);
+    process.exit(1);
   }
 }
-console.log(responses)
 
+main();

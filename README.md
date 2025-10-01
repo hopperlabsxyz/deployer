@@ -29,61 +29,77 @@ You can use a temporary private key generated with `cast wallet new` for example
 
 ### 2. Config File
 
-Create a `config.json` file in the project root with your deployment configuration:
+Edit the `config.ts` file in the project root with your deployment configuration:
 
-```json
-{
-  "chainId": 43114,
-  "vaultsToDeploy": [
+```typescript
+import type { Config } from "./src/type";
+
+export const config: Config = {
+  chainId: 43114,
+  vaultsToDeploy: [
     {
-      "underlying": "0x1234567890123456789012345678901234567890",
-      "name": "My Vault",
-      "safe": "0x1234567890123456789012345678901234567890",
-      "symbol": "VAULT",
-      "whitelistManager": "0x1234567890123456789012345678901234567890",
-      "valuationManager": "0x1234567890123456789012345678901234567890",
-      "admin": "0x1234567890123456789012345678901234567890",
-      "feeReceiver": "0x1234567890123456789012345678901234567890",
-      "managementRate": 200,
-      "performanceRate": 2000,
-      "enableWhitelist": false,
-      "rateUpdateCooldown": "86400"
+      version: "latest",
+      underlying: "0x152b9d0FdC40C096757F570A51E494bd4b943E50",
+      name: "Turtle Avalanche BTC.b",
+      symbol: "turtleAvalancheBTC.b",
+      safe: "0x987dac2F8994785392a256b68A54a79f2327Ac97",
+      admin: "0x987dac2F8994785392a256b68A54a79f2327Ac97",
+      whitelistManager: "0x0000000000000000000000000000000000000000",
+      feeReceiver: "0x6fF36F81e326E7E5117eBa37A6bfCe9a44D17177",
+      valuationManager: "0xD1Ff17F544d7CA5138C25874b16eF801aC113882",
+      performanceRate: 2000,
+      managementRate: 0,
+      rateUpdateCooldown: 0,
+      enableWhitelist: false
     }
   ]
-}
+};
+```
+
+
+Then, you can generate the `config.json` file from your typescript code:
+
+```
+./config.ts > config.json
 ```
 
 #### Configuration Parameters
 
-- `chainId`: The blockchain network ID
-  - `1`: Ethereum Mainnet
-  - `43114`: Avalanche C-Chain
-  - `747474`: Katana Network
-  - `14853`: TAC Network
+- `chainId`: The blockchain network ID (ex: `1` for Ethereum Mainnet)
 
 - `vaultsToDeploy`: Array of vault configurations
-  - `underlying`: asset address
+  - `version`: Version of the vault implementation to deploy ("latest" or specific version)
+  - `underlying`: Asset address
   - `name`: Vault name
   - `safe`: Address of the Safe/multisig that will own the vault
   - `symbol`: Token symbol for the vault shares
-  - `whitelistManager`: Address authorized to manage the whitelist
+  - `whitelistManager`: Address authorized to manage the whitelist (use zero address to disable)
   - `valuationManager`: Address responsible for asset valuation
   - `admin`: Admin address for the vault
   - `feeReceiver`: Address that will receive fees
   - `managementRate`: Management fee rate (basis points, e.g., 200 = 2%)
   - `performanceRate`: Performance fee rate (basis points, e.g., 2000 = 20%)
   - `enableWhitelist`: Whether to enable investor whitelisting
-  - `rateUpdateCooldown`: Cooldown period between rate updates (in seconds as string)
+  - `rateUpdateCooldown`: Cooldown period between rate updates (in seconds)
 
 ## Usage
 
 ### Deploy Vaults
 
-Run the script to deploy all configured vaults:
+To test your configuration without actual deployment run:
 
 ```bash
-bun run deploy.ts
+./deploy.ts
 ```
+
+This will validate your configuration and show what would be deployed without executing transactions.
+
+Then you can broadcast your deployment running:
+
+```bash
+./deploy.ts --broadcast
+```
+
 
 ## Output
 
@@ -101,10 +117,10 @@ The script will output an array of transaction hashes for each successful deploy
 - Keep your private key secure and never commit it to version control
 - Verify all addresses in your config file are correct
 - Ensure the deployer account has sufficient native tokens for gas fees
+- Use simulation mode to test configurations before actual deployment
 
 ## Troubleshooting
 
 - **"PRIVATE_KEY not a `0x${string}`"**: Ensure your private key starts with `0x`
-- **"Chain id X not supported"**: Check that the chainId in config.json matches a supported network
+- **"Chain id X not supported"**: Check that the chainId in config.ts matches a supported network
 - **Transaction failures**: Verify all addresses exist and the deployer has sufficient gas funds
-
