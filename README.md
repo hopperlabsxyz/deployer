@@ -10,7 +10,8 @@ A TypeScript script for deploying vault proxies using the Lagoon Protocol factor
 
 ## Installation
 
-* Install dependencies:
+- Install dependencies:
+
 ```bash
 bun install
 ```
@@ -50,12 +51,11 @@ export const config: Config = {
       performanceRate: 2000,
       managementRate: 0,
       rateUpdateCooldown: 0,
-      enableWhitelist: false
-    }
-  ]
+      enableWhitelist: false,
+    },
+  ],
 };
 ```
-
 
 Then, you can generate the `config.json` file from your typescript code:
 
@@ -65,15 +65,19 @@ Then, you can generate the `config.json` file from your typescript code:
 
 #### Configuration Parameters
 
+For more details, please refer to the [Create your vault](https://docs.lagoon.finance/vault/create-your-vault) documentation.
+
 - `chainId`: The blockchain network ID (ex: `1` for Ethereum Mainnet)
 
 - `vaultsToDeploy`: Array of vault configurations
   - `version`: Version of the vault implementation to deploy ("latest" or specific version)
+  - `initialDelay`: Minimum delay before an upgrade can be effective. To express in seconds, minimum and default is 1 day (86400 seconds). Maximun is 30 days (2592000 seconds).
+  - `initialOwner`: Address authorized to manage upgrades, by default the admin address is used
   - `underlying`: Asset address
   - `name`: Vault name
   - `safe`: Address of the Safe/multisig that will own the vault
   - `symbol`: Token symbol for the vault shares
-  - `whitelistManager`: Address authorized to manage the whitelist (use zero address to disable)
+  - `whitelistManager`: Address authorized to manage the whitelist
   - `valuationManager`: Address responsible for asset valuation
   - `admin`: Admin address for the vault
   - `feeReceiver`: Address that will receive fees
@@ -81,6 +85,7 @@ Then, you can generate the `config.json` file from your typescript code:
   - `performanceRate`: Performance fee rate (basis points, e.g., 2000 = 20%)
   - `enableWhitelist`: Whether to enable investor whitelisting
   - `rateUpdateCooldown`: Cooldown period between rate updates (in seconds)
+  - `salt`: Salt for the vault deployment
 
 ## Usage
 
@@ -99,7 +104,6 @@ Then you can broadcast your deployment running:
 ```bash
 ./deploy.ts --broadcast
 ```
-
 
 ## Output
 
