@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { maxUint256, type Address, type Hex, type Prettify } from "viem";
+import { type Address, type Hex, type Prettify } from "viem";
 import { readFileSync } from "fs";
 import { join } from "path";
 import { account, createChainClients } from "./src/client";
@@ -13,7 +13,6 @@ import type { Config, VaultConfig, VaultInit } from "./src/type";
 import optinFactoryAbi from "./src/abis/optinFactoryAbi";
 import {
   assertValidChainId,
-  assertVersionSupported,
   generateRandomBytes32,
 } from "./src/utils";
 
@@ -74,20 +73,19 @@ async function simulateWithOptinFactory(
   });
 }
 
-function getDeploymentAddresses(chainId: ChainId, version: VersionOrLatest) {
+function getDeploymentAddresses(chainId: number, versionOrlatest: string | 'latest') {
   assertValidChainId(chainId);
-  assertVersionSupported(chainId, version);
   const deployAddress: Address = addresses[chainId].optinFactory;
-  if (version === "latest") {
+  if (versionOrlatest === "latest") {
     return {
       deployAddress,
       logicAddress: "0x0000000000000000000000000000000000000000" as Address,
     };
   }
+  // Parse version from v*.*.* to v*_*_* format
+  const version = versionOrlatest.replace(/\./g, '_');
   if (!addresses[chainId].hasOwnProperty(version))
-    throw new Error(
-      `Error while getting deployement addresses on chain id ${chainId} and version ${version}`
-    );
+    throw new Error(`Address for version ${versionOrlatest} does not exists on chain ${chainId}`);
   const logicAddress: Address = (addresses as any)[chainId][version];
   return {
     deployAddress,
