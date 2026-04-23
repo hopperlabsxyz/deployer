@@ -1,1 +1,48 @@
-export default [{ "inputs": [{ "internalType": "bool", "name": "disable", "type": "bool" }], "stateMutability": "nonpayable", "type": "constructor" }, { "inputs": [], "name": "InvalidInitialization", "type": "error" }, { "inputs": [], "name": "NotInitializing", "type": "error" }, { "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }], "name": "OwnableInvalidOwner", "type": "error" }, { "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name": "OwnableUnauthorizedAccount", "type": "error" }, { "anonymous": false, "inputs": [{ "indexed": false, "internalType": "uint64", "name": "version", "type": "uint64" }], "name": "Initialized", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }], "name": "OwnershipTransferred", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "internalType": "address", "name": "proxy", "type": "address" }, { "indexed": false, "internalType": "address", "name": "deployer", "type": "address" }], "name": "ProxyDeployed", "type": "event" }, { "inputs": [{ "internalType": "address", "name": "_logic", "type": "address" }, { "internalType": "address", "name": "_initialOwner", "type": "address" }, { "internalType": "uint256", "name": "_initialDelay", "type": "uint256" }, { "components": [{ "internalType": "contract IERC20", "name": "underlying", "type": "address" }, { "internalType": "string", "name": "name", "type": "string" }, { "internalType": "string", "name": "symbol", "type": "string" }, { "internalType": "address", "name": "safe", "type": "address" }, { "internalType": "address", "name": "whitelistManager", "type": "address" }, { "internalType": "address", "name": "valuationManager", "type": "address" }, { "internalType": "address", "name": "admin", "type": "address" }, { "internalType": "address", "name": "feeReceiver", "type": "address" }, { "internalType": "uint16", "name": "managementRate", "type": "uint16" }, { "internalType": "uint16", "name": "performanceRate", "type": "uint16" }, { "internalType": "bool", "name": "enableWhitelist", "type": "bool" }, { "internalType": "uint256", "name": "rateUpdateCooldown", "type": "uint256" }], "internalType": "struct InitStruct", "name": "_init", "type": "tuple" }, { "internalType": "bytes32", "name": "salt", "type": "bytes32" }], "name": "createVaultProxy", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "_registry", "type": "address" }, { "internalType": "address", "name": "_wrappedNativeToken", "type": "address" }, { "internalType": "address", "name": "owner", "type": "address" }], "name": "initialize", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "vault", "type": "address" }], "name": "isInstance", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "owner", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "registry", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "renounceOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }], "name": "transferOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "wrappedNativeToken", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }] as const
+// ABI for protocol-v3 OptinProxyFactory.
+// Only the functions the deployer script uses are included.
+// Source: lagoon-v0-internal/src/protocol-v3/OptinProxyFactory.sol
+export default [
+  {
+    type: "function",
+    name: "createVaultProxy",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "_logic", type: "address" },
+      { name: "_initialOwner", type: "address" },
+      { name: "_initialDelay", type: "uint256" },
+      { name: "call_data", type: "bytes" },
+      { name: "salt", type: "bytes32" },
+    ],
+    outputs: [{ name: "", type: "address" }],
+  },
+  {
+    type: "function",
+    name: "registry",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "address" }],
+  },
+  {
+    type: "function",
+    name: "wrappedNativeToken",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "address" }],
+  },
+  {
+    type: "function",
+    name: "isInstance",
+    stateMutability: "view",
+    inputs: [{ name: "vault", type: "address" }],
+    outputs: [{ name: "", type: "bool" }],
+  },
+  {
+    type: "event",
+    name: "ProxyDeployed",
+    anonymous: false,
+    inputs: [
+      { name: "proxy", type: "address", indexed: false },
+      { name: "deployer", type: "address", indexed: false },
+    ],
+  },
+] as const;
