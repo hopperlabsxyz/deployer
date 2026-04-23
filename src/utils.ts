@@ -1,18 +1,10 @@
-import {
-  addresses,
-  Version,
-  type ChainId,
-  type VersionOrLatest,
-} from "@lagoon-protocol/v0-core";
 import type { Address, Hex, PrivateKeyAccount } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
+import { DEPLOYER_BY_CHAIN } from "./addresses";
 
 export function generateRandomBytes32(): Hex {
-  // Generate 32 random bytes
   const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
-
-  // Convert to hex string with '0x' prefix
   return ("0x" +
     Array.from(bytes)
       .map((b) => b.toString(16).padStart(2, "0"))
@@ -33,8 +25,8 @@ export function loadAccount(): PrivateKeyAccount {
 
 export function assertValidChainId(
   chainId: number
-): asserts chainId is keyof typeof addresses {
-  if (!Object.keys(addresses).includes(`${chainId}`)) {
+): asserts chainId is keyof typeof DEPLOYER_BY_CHAIN {
+  if (!(chainId in DEPLOYER_BY_CHAIN)) {
     throw new Error(`Chain id ${chainId} not supported`);
   }
 }

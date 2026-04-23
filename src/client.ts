@@ -1,20 +1,11 @@
-import {
-  addresses,
-  ChainId,
-  ChainUtils,
-  Version,
-  type VersionOrLatest,
-} from "@lagoon-protocol/v0-core";
+import { ChainId, ChainUtils } from "@lagoon-protocol/v0-core";
 import {
   createPublicClient,
   createWalletClient,
   defineChain,
   http,
-  type Address,
-  type PrivateKeyAccount,
   type PublicClient,
 } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
 import {
   base,
   avalanche,
@@ -70,15 +61,45 @@ export const chains = {
   [ChainId.PlasmaMainnet]: plasma,
 };
 
+// Alchemy subdomain per chain, for chains Alchemy supports.
+// See https://docs.alchemy.com/reference/chain-apis-overview
+const ALCHEMY_SUBDOMAIN: Partial<Record<number, string>> = {
+  [ChainId.EthMainnet]: "eth-mainnet",
+  [ChainId.BaseMainnet]: "base-mainnet",
+  [ChainId.PolygonMainnet]: "polygon-mainnet",
+  [ChainId.ArbitrumMainnet]: "arb-mainnet",
+  [ChainId.OptimismMainnet]: "opt-mainnet",
+  [ChainId.WorldChainMainnet]: "worldchain-mainnet",
+  [ChainId.UnichainMainnet]: "unichain-mainnet",
+  [ChainId.SonicMainnet]: "sonic-mainnet",
+  [ChainId.BerachainMainnet]: "berachain-mainnet",
+  [ChainId.MantleMainnet]: "mantle-mainnet",
+  [ChainId.AvalancheMainnet]: "avax-mainnet",
+  [ChainId.BscMainnet]: "bnb-mainnet",
+  [ChainId.LineaMainnet]: "linea-mainnet",
+};
+
+function resolveRpcUrl(chainId: number, override?: string): string | undefined {
+  if (override) return override;
+  // Per-chain override: RPC_URL_<chainId> in .env (highest priority after argument)
+  const envUrl = Bun.env[`RPC_URL_${chainId}`];
+  if (envUrl) return envUrl;
+  const key = Bun.env.ALCHEMY_API_KEY;
+  const subdomain = ALCHEMY_SUBDOMAIN[chainId];
+  if (key && subdomain) return `https://${subdomain}.g.alchemy.com/v2/${key}`;
+  return undefined; // fall back to viem's default public RPC
+}
+
 export const createChainClients = (chainId: ChainId, rpcUrl?: string) => {
+  const url = resolveRpcUrl(chainId, rpcUrl);
   return {
     publicClient: createPublicClient({
       chain: chains[chainId],
-      transport: http(rpcUrl),
+      transport: http(url),
     }) as PublicClient,
     walletClient: createWalletClient({
       chain: chains[chainId],
-      transport: http(rpcUrl),
+      transport: http(url),
       account,
     }),
   };
