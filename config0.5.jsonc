@@ -5,7 +5,7 @@
       "version": "v0.5.0",
       "initialDelay": 86400,
       "initialOwner": "0x0000000000000000000000000000000000000001",
-      "underlying": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "underlying": "0x0000000000000000000000000000000000000001",
       "name": "Test v0.5",
       "symbol": "tv5",
       "safe": "0x0000000000000000000000000000000000000001",
