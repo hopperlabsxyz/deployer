@@ -1,192 +1,165 @@
 #!/usr/bin/env bun
 
+import { type Address, type Hex, type Prettify } from "viem";
+import { readFileSync } from "fs";
 import { join } from "path";
-import { decodeEventLog, type Address, type Hex } from "viem";
-import { account, chains, createChainClients } from "./src/client";
+import { account, createChainClients } from "./src/client";
 import {
-  getDeployerAddress,
-  getImplementationAddress,
-  type LagoonVersion,
-} from "./src/addresses";
+  addresses,
+  ChainId,
+  type VersionOrLatest,
+} from "@lagoon-protocol/v0-core";
+import type { Config, VaultConfig, VaultInit } from "./src/type";
 import optinFactoryAbi from "./src/abis/optinFactoryAbi";
-import { buildInitCallData } from "./src/encoding";
-import type { Config, VaultConfig } from "./src/type";
-import { assertValidChainId, generateRandomBytes32 } from "./src/utils";
-
-type CreateArgs = {
-  _logic: Address;
-  _initialOwner: Address;
-  _initialDelay: bigint;
-  call_data: Hex;
-  salt: Hex;
-};
-
-type DeployResult = {
-  vault: Address;
-  hash?: Hex;
-};
+import {
+  assertValidChainId,
+  generateRandomBytes32,
+} from "./src/utils";
 
 async function deployWithOptinFactory(
   chainId: number,
   factory: Address,
-  args: CreateArgs
-): Promise<DeployResult> {
+  {
+    _logic,
+    _initialOwner,
+    _initialDelay,
+    _init,
+    salt,
+  }: {
+    _logic: Address;
+    _initialOwner: Address;
+    _initialDelay: bigint;
+    _init: Prettify<VaultInit>;
+    salt: Hex;
+  }
+) {
+  assertValidChainId(chainId);
   const { publicClient, walletClient } = createChainClients(chainId);
   const hash = await walletClient.writeContract({
     address: factory,
     abi: optinFactoryAbi,
     functionName: "createVaultProxy",
-    args: [
-      args._logic,
-      args._initialOwner,
-      args._initialDelay,
-      args.call_data,
-      args.salt,
-    ],
+    args: [_logic, _initialOwner, _initialDelay, _init, salt],
   });
-  const receipt = await publicClient.waitForTransactionReceipt({ hash });
-
-  let vault: Address | undefined;
-  for (const log of receipt.logs) {
-    if (log.address.toLowerCase() !== factory.toLowerCase()) continue;
-    try {
-      const decoded = decodeEventLog({
-        abi: optinFactoryAbi,
-        data: log.data,
-        topics: log.topics,
-      });
-      if (decoded.eventName === "ProxyDeployed") {
-        vault = (decoded.args as { proxy: Address }).proxy;
-        break;
-      }
-    } catch {
-      // not our event
-    }
-  }
-
-  if (!vault)
-    throw new Error(
-      `ProxyDeployed event missing from tx ${hash} — deployment status unknown`
-    );
-
-  return { hash, vault };
+  await publicClient.waitForTransactionReceipt({ hash });
+  return hash;
 }
 
 async function simulateWithOptinFactory(
   chainId: number,
   factory: Address,
-  args: CreateArgs
-): Promise<DeployResult> {
+  {
+    _logic,
+    _initialOwner,
+    _initialDelay,
+    _init,
+    salt,
+  }: {
+    _logic: Address;
+    _initialOwner: Address;
+    _initialDelay: bigint;
+    _init: Prettify<VaultInit>;
+    salt: Hex;
+  }
+) {
+  assertValidChainId(chainId);
   const { publicClient } = createChainClients(chainId);
-  const { result } = await publicClient.simulateContract({
+  return publicClient.simulateContract({
     address: factory,
     abi: optinFactoryAbi,
     functionName: "createVaultProxy",
-    args: [
-      args._logic,
-      args._initialOwner,
-      args._initialDelay,
-      args.call_data,
-      args.salt,
-    ],
+    args: [_logic, _initialOwner, _initialDelay, _init, salt],
     account,
   });
-  return { vault: result as Address };
 }
 
-async function readFactoryContext(chainId: number, factory: Address) {
-  const { publicClient } = createChainClients(chainId);
-  const [feeRegistry, wrappedNativeToken] = await Promise.all([
-    publicClient.readContract({
-      address: factory,
-      abi: optinFactoryAbi,
-      functionName: "registry",
-    }),
-    publicClient.readContract({
-      address: factory,
-      abi: optinFactoryAbi,
-      functionName: "wrappedNativeToken",
-    }),
-  ]);
-  return { feeRegistry, wrappedNativeToken };
+function getDeploymentAddresses(chainId: number, versionOrlatest: string | 'latest') {
+  assertValidChainId(chainId);
+  const deployAddress: Address = addresses[chainId].optinFactory;
+  if (versionOrlatest === "latest") {
+    return {
+      deployAddress,
+      logicAddress: "0x0000000000000000000000000000000000000000" as Address,
+    };
+  }
+  // Parse version from v*.*.* to v*_*_* format
+  const version = versionOrlatest.replace(/\./g, '_');
+  if (!addresses[chainId].hasOwnProperty(version))
+    throw new Error(`Address for version ${versionOrlatest} does not exists on chain ${chainId}`);
+  const logicAddress: Address = (addresses as any)[chainId][version];
+  return {
+    deployAddress,
+    logicAddress,
+  };
 }
 
 async function deploy({
   vaultConfig,
   chainId,
-  simulate,
+  simulate = true,
 }: {
   vaultConfig: VaultConfig;
   chainId: number;
   simulate: boolean;
-}): Promise<DeployResult> {
-  assertValidChainId(chainId);
-  const factory = getDeployerAddress(chainId);
-  const logicAddress = getImplementationAddress(
+}) {
+  const { version } = vaultConfig;
+  const { logicAddress, deployAddress } = getDeploymentAddresses(
     chainId,
-    vaultConfig.version as LagoonVersion
+    version
   );
-
-  const { feeRegistry, wrappedNativeToken } = await readFactoryContext(
-    chainId,
-    factory
-  );
-
-  const call_data = buildInitCallData(
-    vaultConfig,
-    feeRegistry,
-    wrappedNativeToken
-  );
-
   const _initialDelay = vaultConfig.initialDelay
     ? BigInt(vaultConfig.initialDelay)
-    : 86400n; // 1 day
+    : 86400n; // 1day
   const _initialOwner = vaultConfig.initialOwner ?? vaultConfig.admin;
+  const _deploy = simulate ? simulateWithOptinFactory : deployWithOptinFactory;
+  const vaultInit: VaultInit = {
+    underlying: vaultConfig.underlying,
+    name: vaultConfig.name,
+    symbol: vaultConfig.symbol,
+    safe: vaultConfig.safe,
+    admin: vaultConfig.admin,
+    whitelistManager: vaultConfig.whitelistManager,
+    feeReceiver: vaultConfig.feeReceiver,
+    valuationManager: vaultConfig.valuationManager,
+    performanceRate: vaultConfig.performanceRate,
+    managementRate: vaultConfig.managementRate,
+    rateUpdateCooldown: BigInt(vaultConfig.rateUpdateCooldown),
+    enableWhitelist: vaultConfig.enableWhitelist,
+  };
 
-  const run = simulate ? simulateWithOptinFactory : deployWithOptinFactory;
-  return run(chainId, factory, {
+  return _deploy(chainId, deployAddress, {
     _logic: logicAddress,
     _initialOwner,
     _initialDelay,
-    call_data,
+    _init: vaultInit,
     salt: vaultConfig.salt ?? generateRandomBytes32(),
   });
 }
 
-function explorerBase(chainId: number): string | undefined {
-  const chain = chains[chainId as keyof typeof chains];
-  return chain?.blockExplorers?.default?.url;
-}
-
-function printResult(chainId: number, res: DeployResult, simulate: boolean) {
-  const base = explorerBase(chainId);
-  if (res.hash) {
-    const txLink = base ? `${base}/tx/${res.hash}` : res.hash;
-    console.log(`  tx:    ${txLink}`);
-  }
-  const vaultLink = `https://app.lagoon.finance/vault/${chainId}/${res.vault}`;
-  const label = simulate ? "predicted vault" : "vault";
-  console.log(`  ${label}: ${vaultLink}`);
-}
-
 async function main() {
   try {
-    const argv = process.argv.slice(2);
-    const simulate = !argv.includes("--broadcast");
-    const configArg = argv.find((a) => !a.startsWith("--")) ?? "config.jsonc";
+    // We do a simulation by default
+    const simulate = !process.argv.includes("--broadcast");
 
-    const configPath = join(process.cwd(), configArg);
-    const config: Config = (await import(configPath)).default;
+    // Load config from JSON file
+    const configPath = join(process.cwd(), "config.json");
+    const configData = readFileSync(configPath, "utf-8");
+    const config: Config = JSON.parse(configData);
 
     const { chainId, vaultsToDeploy } = config;
+    const responses: any[] = [];
 
     console.log(simulate ? "Running simulation..." : "Deploying vaults...");
 
-    for (const vaultConfig of vaultsToDeploy) {
-      if (!vaultConfig) continue;
-      const res = await deploy({ vaultConfig, chainId, simulate });
-      printResult(chainId, res, simulate);
+    for (let i = 0; i < vaultsToDeploy.length; i++) {
+      const vaultConfig = vaultsToDeploy[i];
+      if (vaultConfig) {
+        const res = await deploy({ vaultConfig, chainId, simulate });
+        responses.push(res);
+      }
     }
+
+    console.log(responses);
 
     process.exit(0);
   } catch (error) {

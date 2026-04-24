@@ -1,7 +1,31 @@
-import type { Address, Hex } from "viem";
-import type { LagoonVersion } from "./addresses";
+import type { ChainId, VersionOrLatest } from "@lagoon-protocol/v0-core";
+import type { Hex } from "viem";
 
-type BaseVaultConfig = {
+type Address = `0x${string}`;
+
+export type VaultInit = {
+  underlying: Address;
+  name: string;
+  symbol: string;
+  safe: Address;
+  admin: Address;
+  whitelistManager: Address;
+  feeReceiver: Address;
+  valuationManager: Address;
+  performanceRate: number;
+  managementRate: number;
+  rateUpdateCooldown: bigint;
+  enableWhitelist: boolean;
+};
+
+export type Config = {
+  chainId: ChainId;
+
+  vaultsToDeploy: VaultConfig[];
+};
+
+export type VaultConfig = {
+  version: VersionOrLatest;
   initialDelay?: number | string;
   initialOwner?: Address;
   underlying: Address;
@@ -12,37 +36,9 @@ type BaseVaultConfig = {
   whitelistManager: Address;
   feeReceiver: Address;
   valuationManager: Address;
-  managementRate: number;
   performanceRate: number;
+  managementRate: number;
+  rateUpdateCooldown: number | string;
+  enableWhitelist: boolean;
   salt?: Hex;
 };
-
-export type VaultConfigV5 = BaseVaultConfig & {
-  version: "v0.4.0" | "v0.5.0";
-  enableWhitelist: boolean;
-  rateUpdateCooldown: number | string;
-};
-
-export type AccessMode = "Blacklist" | "Whitelist";
-
-export type VaultConfigV6 = BaseVaultConfig & {
-  version: "v0.6.0";
-  accessMode: AccessMode;
-  entryRate: number;
-  exitRate: number;
-  haircutRate: number;
-  securityCouncil: Address;
-  externalSanctionsList: Address;
-  initialTotalAssets: number | string;
-  superOperator: Address;
-  allowHighWaterMarkReset: boolean;
-};
-
-export type VaultConfig = VaultConfigV5 | VaultConfigV6;
-
-export type Config = {
-  chainId: number;
-  vaultsToDeploy: VaultConfig[];
-};
-
-export type { LagoonVersion };
