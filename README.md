@@ -56,8 +56,8 @@ export const config: Config = {
     {
       version: "v0.5.0", // "v0.4.0" | "v0.5.0" | "v0.6.0"
       underlying: "0x152b9d0FdC40C096757F570A51E494bd4b943E50",
-      name: "My Vault",
-      symbol: "myVault",
+      name: "Turtle Avalanche BTC.b",
+      symbol: "turtleAvalancheBTC.b",
       safe: "0x987dac2F8994785392a256b68A54a79f2327Ac97",
       admin: "0x987dac2F8994785392a256b68A54a79f2327Ac97",
       whitelistManager: "0x0000000000000000000000000000000000000000",
