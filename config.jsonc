@@ -8,7 +8,7 @@
   "vaultsToDeploy": [
     {
       // Vault implementation version. "v0.4.0" | "v0.5.0" | "v0.6.0".
-      // Per-chain availability: see IMPLEMENTATIONS_BY_CHAIN in src/addresses.ts.
+      // Per-chain availability: see `addresses` in @lagoon-protocol/v0-core.
       // v0.5/v0.6 have different InitStruct shapes — see src/type.ts.
       "version": "v0.6.0",
       // Minimum delay (seconds) before the proxy admin can push an upgrade.
