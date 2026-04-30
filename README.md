@@ -26,7 +26,22 @@ Set the following environment variable:
 PRIVATE_KEY=0x1234567890abcdef... # Your private key with 0x prefix
 ```
 
-You can use a temporary private key generated with `cast wallet new` for example
+You can use a temporary private key generated with `cast wallet new` for example.
+
+Optional RPC overrides (public RPCs can be slow; simulation in particular
+benefits from a faster endpoint):
+
+```bash
+# Used for every chain Alchemy supports
+ALCHEMY_API_KEY=...
+
+# Per-chain override, wins over ALCHEMY_API_KEY and the viem default.
+# Format: RPC_URL_<chainId>=<url>
+RPC_URL_1=https://ethereum-rpc.publicnode.com
+RPC_URL_8453=https://base-rpc.publicnode.com
+```
+
+See `.env.example` for the full list of Alchemy-supported chains.
 
 ### 2. Config File
 
@@ -39,10 +54,10 @@ export const config: Config = {
   chainId: 43114,
   vaultsToDeploy: [
     {
-      version: "latest",
+      version: "v0.5.0", // "v0.4.0" | "v0.5.0" | "v0.6.0"
       underlying: "0x152b9d0FdC40C096757F570A51E494bd4b943E50",
-      name: "Turtle Avalanche BTC.b",
-      symbol: "turtleAvalancheBTC.b",
+      name: "My Vault",
+      symbol: "myVault",
       safe: "0x987dac2F8994785392a256b68A54a79f2327Ac97",
       admin: "0x987dac2F8994785392a256b68A54a79f2327Ac97",
       whitelistManager: "0x0000000000000000000000000000000000000000",
@@ -57,35 +72,26 @@ export const config: Config = {
 };
 ```
 
-Then, you can generate the `config.json` file from your typescript code:
+For `v0.6.0` vaults the config shape is different (access mode, entry/exit/haircut rates,
+security council, super operator, initial total assets, …). See `config.ts` in the repo
+for a commented example.
+
+Then, you can generate the `config.jsonc` file from your typescript code:
 
 ```
-./config.ts > config.json
+./config.ts > config.jsonc
 ```
+
+`config.jsonc` is JSON with `//` and `/* */` comments — `deploy.ts` strips them
+before parsing. Regenerating from `config.ts` will overwrite any hand-written
+comments in the `.jsonc` file.
 
 #### Configuration Parameters
 
 For more details, please refer to the [Create your vault](https://docs.lagoon.finance/vault/create-your-vault) documentation.
 
-- `chainId`: The blockchain network ID (ex: `1` for Ethereum Mainnet)
-
-- `vaultsToDeploy`: Array of vault configurations
-  - `version`: Version of the vault implementation to deploy ("latest" or specific version)
-  - `initialDelay`: Minimum delay before an upgrade can be effective. To express in seconds, minimum and default is 1 day (86400 seconds). Maximun is 30 days (2592000 seconds).
-  - `initialOwner`: Address authorized to manage upgrades, by default the admin address is used
-  - `underlying`: Asset address
-  - `name`: Vault name
-  - `safe`: Address of the Safe/multisig that will own the vault
-  - `symbol`: Token symbol for the vault shares
-  - `whitelistManager`: Address authorized to manage the whitelist
-  - `valuationManager`: Address responsible for asset valuation
-  - `admin`: Admin address for the vault
-  - `feeReceiver`: Address that will receive fees
-  - `managementRate`: Management fee rate (basis points, e.g., 200 = 2%)
-  - `performanceRate`: Performance fee rate (basis points, e.g., 2000 = 20%)
-  - `enableWhitelist`: Whether to enable investor whitelisting
-  - `rateUpdateCooldown`: Cooldown period between rate updates (in seconds)
-  - `salt`: Salt for the vault deployment
+`config.jsonc` ships with per-field comments explaining every value and its
+allowed range; see that file for the canonical list.
 
 ## Usage
 
@@ -105,16 +111,30 @@ Then you can broadcast your deployment running:
 ./deploy.ts --broadcast
 ```
 
+You can also point the script at an alternative config file (handy for keeping
+separate configs per version or per network):
+
+```bash
+./deploy.ts config0.5.jsonc
+./deploy.ts config0.5.jsonc --broadcast
+```
+
 ## Output
 
-The script will output an array of transaction hashes for each successful deployment:
+For each vault, the script prints the vault URL on Lagoon and — for broadcasts
+— an explorer link to the deployment transaction:
 
 ```
-[
-  "0xabcdef1234567890...",
-  "0x1234567890abcdef..."
-]
+Running simulation...
+  predicted vault: https://app.lagoon.finance/vault/1/0x7785ff62AC3887A2867CD0948ff6d5D160CEB6B0
+
+Deploying vaults...
+  tx:    https://etherscan.io/tx/0xabcdef1234567890...
+  vault: https://app.lagoon.finance/vault/1/0x7785ff62AC3887A2867CD0948ff6d5D160CEB6B0
 ```
+
+In simulation the vault address is the CREATE2 prediction; pin `salt` in the
+config to keep it stable across runs.
 
 ## Security Notes
 
