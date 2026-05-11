@@ -108,6 +108,7 @@ function encodeInitV6(cfg: VaultConfigV6): Hex {
       exitRate: cfg.exitRate,
       haircutRate: cfg.haircutRate,
       securityCouncil: cfg.securityCouncil,
+      // Forced to address(0) — the deployer never enrolls a sanctions oracle.
       externalSanctionsList: "0x0000000000000000000000000000000000000000",
       initialTotalAssets: BigInt(cfg.initialTotalAssets),
       superOperator: cfg.superOperator,
