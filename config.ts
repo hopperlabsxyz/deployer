@@ -62,10 +62,6 @@ export const config: Config = {
       // v0.6 only. Security council address — emergency pause powers.
       // Set to 0x0…0 to disable.
       securityCouncil: ROLE,
-      // v0.6 only. External sanctions list contract (OFAC-like oracle).
-      // Chainalysis default on Ethereum: 0x40C57923924B5c5c5455c48D93317139ADDaC8fb
-      // Set to 0x0…0 if you don't want to consult one.
-      externalSanctionsList: ZERO,
       // v0.6 only. Initial totalAssets (uint256). Use 0 for fresh vaults;
       // non-zero is meant for migrations that carry an existing balance.
       initialTotalAssets: 0,

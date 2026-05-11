@@ -184,6 +184,14 @@ async function main() {
 
     for (const vaultConfig of vaultsToDeploy) {
       if (!vaultConfig) continue;
+      if (
+        vaultConfig.version === "v0.6.0" &&
+        "externalSanctionsList" in (vaultConfig as Record<string, unknown>)
+      ) {
+        console.warn(
+          `[warn] vault "${vaultConfig.name}": externalSanctionsList is set in config but will be ignored — the deployer forces address(0).`
+        );
+      }
       const res = await deploy({ vaultConfig, chainId, simulate });
       printResult(chainId, res, simulate);
     }
