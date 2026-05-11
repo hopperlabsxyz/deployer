@@ -32,7 +32,6 @@ export type VaultConfigV6 = BaseVaultConfig & {
   exitRate: number;
   haircutRate: number;
   securityCouncil: Address;
-  externalSanctionsList: Address;
   initialTotalAssets: number | string;
   superOperator: Address;
   allowHighWaterMarkReset: boolean;
