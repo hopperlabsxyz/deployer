@@ -10,8 +10,8 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@lagoon-protocol/v0-core": "^0.19.7",
-    "@lagoon-protocol/v0-viem": "^0.18.4",
+    "@lagoon-protocol/v0-core": "^0.19.10",
+    "@lagoon-protocol/v0-viem": "^0.18.7",
     "viem": "^2.37.9"
   }
 }
