@@ -34,13 +34,14 @@ export function getImplementationAddress(
   if (!entry)
     throw new Error(`Chain ${chainId} has no known Lagoon implementations`);
 
+  const versionAddrs = entry as unknown as Record<string, string | undefined>;
   const key = VERSION_KEY[version];
-  const addr = (entry as Record<string, string | undefined>)[key];
+  const addr = versionAddrs[key];
 
   if (!addr || addr.toLowerCase() === ZERO_ADDRESS) {
     const available = (Object.keys(VERSION_KEY) as LagoonVersion[]).filter(
       (v) => {
-        const a = (entry as Record<string, string | undefined>)[VERSION_KEY[v]];
+        const a = versionAddrs[VERSION_KEY[v]];
         return a && a.toLowerCase() !== ZERO_ADDRESS;
       }
     );
