@@ -23,6 +23,9 @@ import {
   mantle,
   bsc,
   plasma,
+  monad,
+  sei,
+  hemi,
 } from "viem/chains";
 import { loadAccount } from "./utils";
 
@@ -37,6 +40,20 @@ const hyperevm = defineChain({
     },
     public: {
       http: ["https://hyperliquid.drpc.org"],
+    },
+  },
+});
+
+// Rayls is not yet defined in viem/chains.
+const rayls = defineChain({
+  ...ChainUtils.CHAIN_METADATA[ChainId.RaylsMainnet],
+  network: "rayls",
+  rpcUrls: {
+    default: {
+      http: ["https://mainnet-rpc.rayls.com"],
+    },
+    public: {
+      http: ["https://mainnet-rpc.rayls.com"],
     },
   },
 });
@@ -59,6 +76,10 @@ export const chains = {
   [ChainId.HyperEVMMainnet]: hyperevm,
   [ChainId.LineaMainnet]: linea,
   [ChainId.PlasmaMainnet]: plasma,
+  [ChainId.MonadMainnet]: monad,
+  [ChainId.SeiMainnet]: sei,
+  [ChainId.HemiMainnet]: hemi,
+  [ChainId.RaylsMainnet]: rayls,
 };
 
 // Alchemy subdomain per chain, for chains Alchemy supports.
