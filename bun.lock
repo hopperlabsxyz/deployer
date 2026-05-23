@@ -4,7 +4,7 @@
     "": {
       "name": "tmp",
       "dependencies": {
-        "@lagoon-protocol/v0-core": "^0.19.15",
+        "@lagoon-protocol/v0-core": "^0.19.16",
         "@lagoon-protocol/v0-viem": "^0.18.10",
         "viem": "^2.50.4",
       },
@@ -19,7 +19,7 @@
   "packages": {
     "@adraffy/ens-normalize": ["@adraffy/ens-normalize@1.11.0", "", {}, "sha512-/3DDPKHqqIqxUULp8yP4zODUY1i+2xvVWsv8A79xGWdCAG+8sb0hRh0Rk2QyOJUnnbyPUAZYcpBuRe3nS2OIUg=="],
 
-    "@lagoon-protocol/v0-core": ["@lagoon-protocol/v0-core@0.19.15", "", { "peerDependencies": { "typescript": "^5.9.3" } }, "sha512-HImf7T/EzYgc3OliwLZKIy+KN4Vsy2D0gi+pv7k93o0NDr0I7Vzph4rKHavPa/Evi/opGGeAbOzrpweq0dDS5g=="],
+    "@lagoon-protocol/v0-core": ["@lagoon-protocol/v0-core@0.19.16", "", { "peerDependencies": { "typescript": "^5.9.3" } }, "sha512-1JmyLoV3Q9MhrWoETTGUy0gal2sz5rd3LMqcAHm/caBYJxzaRKoLwFGN9tBJPElxVjp1nZ78ns6rO0mKnGIQ9w=="],
 
     "@lagoon-protocol/v0-viem": ["@lagoon-protocol/v0-viem@0.18.10", "", { "peerDependencies": { "@lagoon-protocol/v0-core": "^0.19.6", "viem": "^2.0.0" } }, "sha512-wlWpw63MEl8e9f0eyeyQ6NatTsc1C8axQYwcDRVR10tf5/sqDiKh/1tyTuhp/M4ib9SGo9ZfVoMeoba3nsoIXw=="],
 
