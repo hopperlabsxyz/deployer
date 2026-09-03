@@ -26,6 +26,7 @@ import {
   monad,
   sei,
   hemi,
+  flare,
 } from "viem/chains";
 import { loadAccount } from "./utils";
 
@@ -80,6 +81,7 @@ export const chains = {
   [ChainId.SeiMainnet]: sei,
   [ChainId.HemiMainnet]: hemi,
   [ChainId.RaylsMainnet]: rayls,
+  [ChainId.FlareMainnet]: flare,
 };
 
 // Alchemy subdomain per chain, for chains Alchemy supports.
