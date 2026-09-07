@@ -26,6 +26,7 @@ import {
   monad,
   sei,
   hemi,
+  flare,
 } from "viem/chains";
 import { loadAccount } from "./utils";
 
@@ -58,6 +59,20 @@ const rayls = defineChain({
   },
 });
 
+// Robinhood Chain is not yet defined in the viem this repo pins.
+const robinhood = defineChain({
+  ...ChainUtils.CHAIN_METADATA[ChainId.RobinhoodMainnet],
+  network: "robinhood",
+  rpcUrls: {
+    default: {
+      http: ["https://rpc.mainnet.chain.robinhood.com"],
+    },
+    public: {
+      http: ["https://rpc.mainnet.chain.robinhood.com"],
+    },
+  },
+});
+
 export const chains = {
   [ChainId.EthMainnet]: mainnet,
   [ChainId.BaseMainnet]: base,
@@ -80,6 +95,8 @@ export const chains = {
   [ChainId.SeiMainnet]: sei,
   [ChainId.HemiMainnet]: hemi,
   [ChainId.RaylsMainnet]: rayls,
+  [ChainId.FlareMainnet]: flare,
+  [ChainId.RobinhoodMainnet]: robinhood,
 };
 
 // Alchemy subdomain per chain, for chains Alchemy supports.
@@ -98,6 +115,7 @@ const ALCHEMY_SUBDOMAIN: Partial<Record<number, string>> = {
   [ChainId.AvalancheMainnet]: "avax-mainnet",
   [ChainId.BscMainnet]: "bnb-mainnet",
   [ChainId.LineaMainnet]: "linea-mainnet",
+  [ChainId.RobinhoodMainnet]: "robinhood-mainnet",
 };
 
 function resolveRpcUrl(chainId: number, override?: string): string | undefined {

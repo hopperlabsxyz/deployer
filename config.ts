@@ -10,7 +10,7 @@ const ZERO = "0x0000000000000000000000000000000000000000" as const;
 export const config: Config = {
   // EIP-155 chain ID. Factory + implementation must be deployed on this chain.
   // See src/addresses.ts for the supported set.
-  // Examples: 1 = Ethereum, 8453 = Base, 42161 = Arbitrum, 137 = Polygon.
+  // Examples: ChainId.EthMainnet, ChainId.BaseMainnet, ChainId.RobinhoodMainnet.
   chainId: ChainId.EthMainnet,
   vaultsToDeploy: [
     {
