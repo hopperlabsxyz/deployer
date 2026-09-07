@@ -26,8 +26,8 @@ import {
   monad,
   sei,
   hemi,
+  flare,
 } from "viem/chains";
-import { ROBINHOOD_CHAIN_ID } from "./addresses";
 import { loadAccount } from "./utils";
 
 export const account = loadAccount();
@@ -59,25 +59,16 @@ const rayls = defineChain({
   },
 });
 
-// Robinhood Chain is in later viem releases, but not in the viem this repo pins.
+// Robinhood Chain is not yet defined in the viem this repo pins.
 const robinhood = defineChain({
-  id: ROBINHOOD_CHAIN_ID,
-  name: "Robinhood Chain",
+  ...ChainUtils.CHAIN_METADATA[ChainId.RobinhoodMainnet],
   network: "robinhood",
-  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
   rpcUrls: {
     default: {
       http: ["https://rpc.mainnet.chain.robinhood.com"],
     },
     public: {
       http: ["https://rpc.mainnet.chain.robinhood.com"],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: "Blockscout",
-      url: "https://robinhoodchain.blockscout.com",
-      apiUrl: "https://robinhoodchain.blockscout.com/api",
     },
   },
 });
@@ -104,7 +95,8 @@ export const chains = {
   [ChainId.SeiMainnet]: sei,
   [ChainId.HemiMainnet]: hemi,
   [ChainId.RaylsMainnet]: rayls,
-  [ROBINHOOD_CHAIN_ID]: robinhood,
+  [ChainId.FlareMainnet]: flare,
+  [ChainId.RobinhoodMainnet]: robinhood,
 };
 
 // Alchemy subdomain per chain, for chains Alchemy supports.
@@ -123,7 +115,7 @@ const ALCHEMY_SUBDOMAIN: Partial<Record<number, string>> = {
   [ChainId.AvalancheMainnet]: "avax-mainnet",
   [ChainId.BscMainnet]: "bnb-mainnet",
   [ChainId.LineaMainnet]: "linea-mainnet",
-  [ROBINHOOD_CHAIN_ID]: "robinhood-mainnet",
+  [ChainId.RobinhoodMainnet]: "robinhood-mainnet",
 };
 
 function resolveRpcUrl(chainId: number, override?: string): string | undefined {
@@ -137,17 +129,15 @@ function resolveRpcUrl(chainId: number, override?: string): string | undefined {
   return undefined; // fall back to viem's default public RPC
 }
 
-export const createChainClients = (chainId: number, rpcUrl?: string) => {
-  const chain = chains[chainId as keyof typeof chains];
-  if (!chain) throw new Error(`Chain id ${chainId} not supported`);
+export const createChainClients = (chainId: ChainId, rpcUrl?: string) => {
   const url = resolveRpcUrl(chainId, rpcUrl);
   return {
     publicClient: createPublicClient({
-      chain,
+      chain: chains[chainId],
       transport: http(url),
     }) as PublicClient,
     walletClient: createWalletClient({
-      chain,
+      chain: chains[chainId],
       transport: http(url),
       account,
     }),
