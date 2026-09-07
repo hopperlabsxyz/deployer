@@ -1,11 +1,27 @@
-import { addresses } from "@lagoon-protocol/v0-core";
+import { addresses as sdkAddresses } from "@lagoon-protocol/v0-core";
 import type { Address } from "viem";
 
 export type LagoonVersion = "v0.4.0" | "v0.5.0" | "v0.6.0";
 
-type SupportedChainId = keyof typeof addresses;
+/** EIP-155 id for Robinhood Chain. Not yet in `@lagoon-protocol/v0-core` ChainId. */
+export const ROBINHOOD_CHAIN_ID = 4663;
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
+// Local overlays for chains the SDK does not yet ship. SDK entries win on conflict
+// so this becomes a no-op once v0-core publishes the same chain id.
+const LOCAL_ADDRESSES = {
+  [ROBINHOOD_CHAIN_ID]: {
+    optinFactory: "0x1e17e7848b2F56F75b16550471F455071a9F955f",
+    feeRegistry: "0xF29514C94Db6d5780f2B6372abAeB0f1f5460070",
+    wrappedNative: "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+    v0_6_0: "0xAAcb8fF09bF4cF3897F13e4b33d12001fb70579A",
+    isOptinFactoryV3: true,
+  },
+} as const;
+
+type SdkChainId = keyof typeof sdkAddresses;
+export type SupportedChainId = SdkChainId | typeof ROBINHOOD_CHAIN_ID;
 
 const VERSION_KEY: Record<LagoonVersion, "v0_4_0" | "v0_5_0" | "v0_6_0"> = {
   "v0.4.0": "v0_4_0",
@@ -14,9 +30,14 @@ const VERSION_KEY: Record<LagoonVersion, "v0_4_0" | "v0_5_0" | "v0_6_0"> = {
 };
 
 function getChainAddresses(chainId: number) {
-  const entry = (addresses as Record<number, unknown>)[chainId];
-  if (!entry) return undefined;
-  return entry as (typeof addresses)[SupportedChainId];
+  const sdkEntry = (sdkAddresses as Record<number, unknown>)[chainId];
+  if (sdkEntry) {
+    return sdkEntry as (typeof sdkAddresses)[SdkChainId];
+  }
+  if (chainId === ROBINHOOD_CHAIN_ID) {
+    return LOCAL_ADDRESSES[ROBINHOOD_CHAIN_ID];
+  }
+  return undefined;
 }
 
 export function getDeployerAddress(chainId: number): Address {
@@ -56,5 +77,5 @@ export function getImplementationAddress(
 export function isSupportedChainId(
   chainId: number
 ): chainId is SupportedChainId {
-  return chainId in addresses;
+  return chainId in sdkAddresses || chainId === ROBINHOOD_CHAIN_ID;
 }
