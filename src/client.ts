@@ -73,6 +73,20 @@ const robinhood = defineChain({
   },
 });
 
+// viem ships an `arc` definition, but with an empty RPC list.
+const arc = defineChain({
+  ...ChainUtils.CHAIN_METADATA[ChainId.ArcMainnet],
+  network: "arc",
+  rpcUrls: {
+    default: {
+      http: ["https://rpc.mainnet.arc.io"],
+    },
+    public: {
+      http: ["https://rpc.mainnet.arc.io"],
+    },
+  },
+});
+
 export const chains = {
   [ChainId.EthMainnet]: mainnet,
   [ChainId.BaseMainnet]: base,
@@ -97,6 +111,7 @@ export const chains = {
   [ChainId.RaylsMainnet]: rayls,
   [ChainId.FlareMainnet]: flare,
   [ChainId.RobinhoodMainnet]: robinhood,
+  [ChainId.ArcMainnet]: arc,
 };
 
 // Alchemy subdomain per chain, for chains Alchemy supports.
@@ -116,6 +131,7 @@ const ALCHEMY_SUBDOMAIN: Partial<Record<number, string>> = {
   [ChainId.BscMainnet]: "bnb-mainnet",
   [ChainId.LineaMainnet]: "linea-mainnet",
   [ChainId.RobinhoodMainnet]: "robinhood-mainnet",
+  [ChainId.ArcMainnet]: "arc-mainnet",
 };
 
 function resolveRpcUrl(chainId: number, override?: string): string | undefined {
